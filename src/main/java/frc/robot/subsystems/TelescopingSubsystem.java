@@ -4,13 +4,25 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.drivetrain.SwerveTeleop;
 
-import com.ctre.phoenix.motorcontrol.ControlFrame;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+// import com.ctre.phoenix6.motorcontrol.ControlFrame;
+// import com.ctre.phoenix.motorcontrol.NeutralMode;
+// import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+// import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
+// import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
+// import com.ctre.phoenix.motorcontrol.can.TalonFX;
+// import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import com.ctre.phoenix6.configs.Slot0Configs;
 
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -28,7 +40,7 @@ public class TelescopingSubsystem extends SubsystemBase {
     // Counter counter = new Counter(input);
     boolean click;
 
-    double encoderCount = motor.getSelectedSensorPosition();
+    double encoderCount = motor.getPosition().getValue();
     double startingEncoderCount = encoderCount;
     double speed = 0.3;
     private static final double kP = 0.61; // 0.84
@@ -58,13 +70,15 @@ public class TelescopingSubsystem extends SubsystemBase {
         motor.setNeutralMode(NeutralMode.Brake);
 
         motor.setInverted(TalonFXInvertType.CounterClockwise);
-        encoderCount = motor.getSelectedSensorPosition();
+        encoderCount = motor.getRotorPosition();
 
+        var slot0Configs = new Slot0Configs();
+        slot0Configs.kV = kF;
+        slot0Configs.kP = kP;
+        slot0Configs.kI = kI;
+        slot0Configs.kD = kD;
 
-        motor.config_kP(0, kP);
-        motor.config_kI(0, kI);
-        motor.config_kD(0, kD);
-        motor.config_kF(0, kF);
+        motor.getConfigurator().apply(slot0Configs, 0.050);
 
         motor.configMotionCruiseVelocity(kVelocity);
         motor.configMotionAcceleration(kAcceleration);
@@ -91,27 +105,27 @@ public class TelescopingSubsystem extends SubsystemBase {
     */
     public void resetMotors () {
         motor.setSelectedSensorPosition(0.0);
-        System.out.println("reset" + motor.getSelectedSensorPosition());
+        System.out.println("reset" + motor.getRotorPosition());
     }
 
     public void forward () {
         motor.set(TalonFXControlMode.PercentOutput, -Constants.TelescopingSubsystem.DEFAULT_SPEED);
-        encoderCount = motor.getSelectedSensorPosition();
+        encoderCount = motor.getRotorPosition();
     }
 
     public void backward () {
         motor.set(TalonFXControlMode.PercentOutput, Constants.TelescopingSubsystem.DEFAULT_SPEED);
-        encoderCount = motor.getSelectedSensorPosition();
+        encoderCount = motor.getRotorPosition();
     }
 
     public void stop () {
         motor.set(TalonFXControlMode.PercentOutput, 0.0);
-        encoderCount = motor.getSelectedSensorPosition();
+        encoderCount = motor.getRotorPosition();
     }
 
     public void printStuff(){
         System.out.println("Starting encoder count: " + startingEncoderCount);
-        System.out.println("Current encoder count: " + motor.getSelectedSensorPosition());
+        System.out.println("Current encoder count: " + motor.getRotorPosition());
     }
 
     public void runHigh(){
@@ -171,7 +185,7 @@ public class TelescopingSubsystem extends SubsystemBase {
     private void dashboard () {
         // ShuffleboardTab tab = Shuffleboard.getTab("Intake");
         // tab.add(this);
-        encoderCount = motor.getSelectedSensorPosition();
+        encoderCount = motor.getRotorPosition();
         SmartDashboard.putNumber("Telescope motor", encoderCount);
         SmartDashboard.putNumber("Telescope target", targetPosition);
 
