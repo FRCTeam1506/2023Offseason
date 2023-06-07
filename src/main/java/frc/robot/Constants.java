@@ -4,7 +4,8 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
+// import com.ctre.phoenix6.motorcontrol.NeutralMode;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
 // import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -74,8 +75,8 @@ public final class Constants {
         public static double MAX_ANGULAR_VELOCITY = 11.5; // m/s //11.5
 
         /* Neutral Modes */
-        public static final NeutralMode ANGLE_NEUTRAL_MODE = NeutralMode.Coast;
-        public static final NeutralMode DRIVE_NEUTRAL_MODE = NeutralMode.Brake;
+        public static final NeutralModeValue ANGLE_NEUTRAL_MODE = NeutralModeValue.Coast;
+        public static final NeutralModeValue DRIVE_NEUTRAL_MODE = NeutralModeValue.Brake;
 
         /* Motor Inverts */
         public static final boolean DRIVE_MOTOR_INVERTED = false;
